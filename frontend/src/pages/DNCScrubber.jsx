@@ -59,11 +59,8 @@ const DNCScrubber = () => {
   };
 
   const downloadCSV = (data, filename) => {
-    // data is an array of phone numbers
-    const csv = Papa.unparse({
-      fields: ["Phone Number"],
-      data: data.map(num => [num])
-    });
+    if (!data || data.length === 0) return;
+    const csv = Papa.unparse(data);
     
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -77,14 +74,9 @@ const DNCScrubber = () => {
   };
 
   const downloadFullReport = () => {
-    if (!result) return;
+    if (!result || !result.fullReport) return;
     
-    // Combine clean and matched with status
-    const reportData = [];
-    result.cleanNumbers?.forEach(num => reportData.push({ Phone: num, Status: 'Clean' }));
-    result.matchedNumbers?.forEach(num => reportData.push({ Phone: num, Status: 'DNC Matched' }));
-
-    const csv = Papa.unparse(reportData);
+    const csv = Papa.unparse(result.fullReport);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -203,7 +195,7 @@ const DNCScrubber = () => {
                 <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Download Reports</h3>
                 
                 <button 
-                  onClick={() => downloadCSV(result.cleanNumbers, 'Clean_Numbers.csv')}
+                  onClick={() => downloadCSV(result.cleanRows, 'Clean_Numbers.csv')}
                   className="w-full bg-white border border-green-200 hover:bg-green-50 text-green-700 font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-between group"
                 >
                   <span className="flex items-center"><CheckCircle className="w-4 h-4 mr-2" /> Download Clean File</span>
@@ -211,7 +203,7 @@ const DNCScrubber = () => {
                 </button>
                 
                 <button 
-                  onClick={() => downloadCSV(result.matchedNumbers, 'DNC_Matched.csv')}
+                  onClick={() => downloadCSV(result.matchedRows, 'DNC_Matched.csv')}
                   className="w-full bg-white border border-red-200 hover:bg-red-50 text-red-700 font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-between group"
                 >
                   <span className="flex items-center"><AlertTriangle className="w-4 h-4 mr-2" /> Download Matched File</span>
