@@ -6,6 +6,7 @@ const xlsx = require("xlsx");
 const axios = require("axios");
 const { BlacklistAlliance } = require("blacklist-alliance-client");
 const fs = require("fs");
+const path = require("path");
 
 dotenv.config();
 
@@ -199,6 +200,12 @@ app.post("/api/search", async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+app.get("/{*splat}", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
 const PORT = process.env.PORT || 5000;

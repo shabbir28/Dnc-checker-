@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Papa from 'papaparse';
+import { apiUrl } from '../config/api';
 import { Upload, FileText, CheckCircle, AlertTriangle, Download, Trash2, XCircle, Copy } from 'lucide-react';
 
 const campaigns = [
@@ -46,7 +47,7 @@ const DNCScrubber = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/check', formData, {
+      const response = await axios.post(apiUrl('/api/check'), formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setResult(response.data);

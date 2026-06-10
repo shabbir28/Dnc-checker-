@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { Search, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { apiUrl } from '../config/api';
 
 const SearchNumber = () => {
   const [phone, setPhone] = useState('');
@@ -21,7 +22,7 @@ const SearchNumber = () => {
 
     try {
       // Pointing to our backend
-      const response = await axios.post('http://localhost:5000/api/search', { phone });
+      const response = await axios.post(apiUrl('/api/search'), { phone });
       setResult(response.data);
     } catch (err) {
       console.error(err);

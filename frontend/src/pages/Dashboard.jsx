@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import axios from 'axios';
 import Papa from 'papaparse';
+import { apiUrl } from '../config/api';
 import { UploadCloud, Search, CheckCircle2, Download, AlertTriangle, XCircle, FileText, ChevronDown, Layers, Rocket, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -66,7 +67,7 @@ const Dashboard = () => {
     formData.append('campaign', selectedCampaign);
     formData.append('file', file);
     try {
-      const response = await axios.post('http://localhost:5000/api/check', formData, {
+      const response = await axios.post(apiUrl('/api/check'), formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setScrubResult(response.data);
@@ -91,7 +92,7 @@ const Dashboard = () => {
     setSearchResult(null);
     setLoadingSearch(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/search', { phone: searchPhone });
+      const response = await axios.post(apiUrl('/api/search'), { phone: searchPhone });
       setSearchResult(response.data);
       toast.success('Search Completed!', {
         style: { borderRadius: '12px', fontWeight: 'bold' }
