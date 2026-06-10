@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Papa from 'papaparse';
 import { apiUrl } from '../config/api';
@@ -19,6 +19,13 @@ const Dashboard = () => {
   const [scrubError, setScrubError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+  const scrubResultRef = useRef(null);
+
+  useEffect(() => {
+    if (scrubResult && scrubResultRef.current) {
+      scrubResultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [scrubResult]);
 
   // Searching State
   const [searchPhone, setSearchPhone] = useState('');
@@ -71,15 +78,12 @@ const Dashboard = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setScrubResult(response.data);
-      toast.success('DNC Scrubbing Completed Successfully!', {
-        duration: 5000,
-        style: { borderRadius: '12px', background: '#10b981', color: '#fff', fontWeight: 'bold' },
-      });
+      toast.success('DNC Scrubbing Completed Successfully!');
     } catch (err) {
       console.error(err);
       const errMsg = err.response?.data?.error || 'Scrubbing failed.';
       setScrubError(errMsg);
-      toast.error(errMsg, { style: { borderRadius: '12px', fontWeight: 'bold' } });
+      toast.error(errMsg);
     } finally {
       setLoadingScrub(false);
     }
@@ -94,13 +98,11 @@ const Dashboard = () => {
     try {
       const response = await axios.post(apiUrl('/api/search'), { phone: searchPhone });
       setSearchResult(response.data);
-      toast.success('Search Completed!', {
-        style: { borderRadius: '12px', fontWeight: 'bold' }
-      });
+      toast.success('Search Completed!');
     } catch (err) {
       console.error(err);
       setSearchError('Search failed.');
-      toast.error('Search failed.', { style: { borderRadius: '12px', fontWeight: 'bold' } });
+      toast.error('Search failed.');
     } finally {
       setLoadingSearch(false);
     }
@@ -326,7 +328,10 @@ const Dashboard = () => {
 
       {/* Scrub Result Area */}
       {scrubResult && (
-        <div className="mt-6 mx-2 bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-[0_4px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 animate-in slide-in-from-bottom-8 duration-500 relative overflow-hidden">
+        <div
+          ref={scrubResultRef}
+          className="mt-6 mx-2 bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-[0_4px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 scrub-result-enter relative overflow-hidden scroll-mt-24"
+        >
           <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-emerald-400 to-emerald-600"></div>
           <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-emerald-50 rounded-full blur-[60px] pointer-events-none -mr-32 -mt-32"></div>
           
