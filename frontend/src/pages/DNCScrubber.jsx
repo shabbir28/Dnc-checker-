@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import axios from 'axios';
-import Papa from 'papaparse';
 import { apiUrl } from '../config/api';
 import { Upload, FileText, CheckCircle, AlertTriangle, Download, Trash2, XCircle, Copy } from 'lucide-react';
 
@@ -59,31 +58,12 @@ const DNCScrubber = () => {
     }
   };
 
-  const downloadCSV = (data, filename) => {
-    if (!data || data.length === 0) return;
-    const csv = Papa.unparse(data);
-    
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  // Download via backend URL — triggers a real file download from the server
+  const triggerDownload = (url) => {
+    if (!url) return;
     const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const downloadFullReport = () => {
-    if (!result || !result.fullReport) return;
-    
-    const csv = Papa.unparse(result.fullReport);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'Full_Report.csv');
-    link.style.visibility = 'hidden';
+    link.href = url;
+    link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -169,6 +149,7 @@ const DNCScrubber = () => {
           {/* Results Side */}
           {result && (
             <div className="space-y-6">
+              {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 border border-gray-100 p-4 rounded-xl flex flex-col items-center justify-center text-center">
                   <span className="text-gray-500 text-sm font-medium mb-1">Total Rows</span>
@@ -192,28 +173,46 @@ const DNCScrubber = () => {
                 </div>
               </div>
 
+              {/* CRM Sync Status Banner */}
+              {result.crmSynced === true && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium">
+                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                  {result.crmSyncMessage}
+                </div>
+              )}
+              {result.crmSynced === false && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm font-medium">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  {result.crmSyncMessage}
+                </div>
+              )}
+
+              {/* Download Reports */}
               <div className="space-y-3 pt-4 border-t border-gray-100">
                 <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Download Reports</h3>
                 
                 <button 
-                  onClick={() => downloadCSV(result.cleanRows, 'Clean_Numbers.csv')}
-                  className="w-full bg-white border border-green-200 hover:bg-green-50 text-green-700 font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-between group"
+                  onClick={() => triggerDownload(result.cleanFileUrl)}
+                  disabled={!result.cleanFileUrl}
+                  className="w-full bg-white border border-green-200 hover:bg-green-50 text-green-700 font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-between group disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <span className="flex items-center"><CheckCircle className="w-4 h-4 mr-2" /> Download Clean File</span>
                   <Download className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                 </button>
                 
                 <button 
-                  onClick={() => downloadCSV(result.matchedRows, 'DNC_Matched.csv')}
-                  className="w-full bg-white border border-red-200 hover:bg-red-50 text-red-700 font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-between group"
+                  onClick={() => triggerDownload(result.matchedFileUrl)}
+                  disabled={!result.matchedFileUrl}
+                  className="w-full bg-white border border-red-200 hover:bg-red-50 text-red-700 font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-between group disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <span className="flex items-center"><AlertTriangle className="w-4 h-4 mr-2" /> Download Matched File</span>
                   <Download className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                 </button>
                 
                 <button 
-                  onClick={downloadFullReport}
-                  className="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-between"
+                  onClick={() => triggerDownload(result.reportFileUrl)}
+                  disabled={!result.reportFileUrl}
+                  className="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-between disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <span className="flex items-center"><FileText className="w-4 h-4 mr-2" /> Download Full Report</span>
                   <Download className="w-4 h-4" />

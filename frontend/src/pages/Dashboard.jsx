@@ -108,15 +108,12 @@ const Dashboard = () => {
     }
   };
 
-  const downloadCSV = (dataRows, filename) => {
-    const csv = Papa.unparse(dataRows);
-    const baseName = filename.includes('.') ? filename.substring(0, filename.lastIndexOf('.')) : filename;
-    const finalFilename = `${baseName}.csv`;
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  // Download via backend URL — no client-side CSV generation
+  const triggerDownload = (url) => {
+    if (!url) return;
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = finalFilename;
+    link.href = url;
+    link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -347,10 +344,18 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <button onClick={() => downloadCSV(scrubResult.cleanRows, `Clean_${file?.name}`)} className="bg-white border-2 border-emerald-100 hover:border-emerald-200 hover:bg-emerald-50 text-emerald-700 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-center text-xs">
+              <button
+                onClick={() => triggerDownload(scrubResult.cleanFileUrl)}
+                disabled={!scrubResult.cleanFileUrl}
+                className="bg-white border-2 border-emerald-100 hover:border-emerald-200 hover:bg-emerald-50 text-emerald-700 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-center text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 <Download className="w-4 h-4 mr-1.5 text-emerald-500" /> Clean ({scrubResult.clean.toLocaleString()})
               </button>
-              <button onClick={() => downloadCSV(scrubResult.matchedRows, `Matched_${file?.name}`)} className="bg-white border-2 border-rose-100 hover:border-rose-200 hover:bg-rose-50 text-rose-700 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-center text-xs">
+              <button
+                onClick={() => triggerDownload(scrubResult.matchedFileUrl)}
+                disabled={!scrubResult.matchedFileUrl}
+                className="bg-white border-2 border-rose-100 hover:border-rose-200 hover:bg-rose-50 text-rose-700 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-center text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 <Download className="w-4 h-4 mr-1.5 text-rose-500" /> DNC ({scrubResult.matched.toLocaleString()})
               </button>
             </div>
