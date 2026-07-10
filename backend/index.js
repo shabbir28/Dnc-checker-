@@ -300,18 +300,34 @@ app.post("/api/search", async (req, res) => {
 
     try {
       const client = new BlacklistAlliance(apiKey, { timeout: 10000 });
-      const bulkResult = await client.bulkLookupSimple([cleaned], {
-        responseFormat: "json",
-      });
-      const rawSuppressed =
-        bulkResult?.supression ?? bulkResult?.suppression ?? [];
-      const suppressedSet = new Set(
-        rawSuppressed.map((p) => String(p).replace(/\D/g, ""))
-      );
+      const singleResult = await client.lookupSingle(cleaned);
+      
+      const isDnc = singleResult.results === 1;
+      const isWireless = singleResult.wireless === 1;
+      
+      const statusStr = isDnc ? "DNC" : "Clean";
+      const lineType = isWireless ? "Wireless" : "Landline";
 
-      const isDnc =
-        suppressedSet.has(cleaned) || suppressedSet.has(`1${cleaned}`);
-      return res.json({ status: isDnc ? "DNC" : "Clean", phone: cleaned });
+      // ── CRM Sync (Single Phone) ──────────────────────────────────────────
+      const crmPayload = {
+        phoneNumber: cleaned,
+        dncStatus: statusStr,
+        source: "checkdncnumber.com",
+        checkedAt: new Date().toISOString(),
+        lineType: lineType
+      };
+
+      const crmSync = await syncDncResultToCrm(crmPayload, true);
+      const crmSynced = crmSync.success === true;
+      const crmSyncMessage = crmSynced
+        ? "Result synced with CRM successfully."
+        : "DNC check completed, but CRM sync failed.";
+
+      if (!crmSynced) {
+        console.warn("[CRM Sync] Sync failed:", crmSync.message);
+      }
+
+      return res.json({ status: statusStr, phone: cleaned, lineType, crmSynced, crmSyncMessage });
     } catch (apiError) {
       console.error(
         "BLA API Error:",

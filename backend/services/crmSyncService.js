@@ -5,15 +5,20 @@ const axios = require("axios");
  * Never throws — CRM unavailability must not break the main DNC flow.
  *
  * @param {Object} payload  - Summary data to POST to CRM
+ * @param {boolean} isSingle - True if sending a single DNC check result
  * @returns {{ success: boolean, data?: any, message?: string }}
  */
-const syncDncResultToCrm = async (payload) => {
-  const url = process.env.CRM_SYNC_URL;
+const syncDncResultToCrm = async (payload, isSingle = false) => {
+  let url = process.env.CRM_SYNC_URL;
   const secret = process.env.CRM_SYNC_SECRET;
 
   if (!url || !secret) {
     console.warn("[CRM Sync] CRM_SYNC_URL or CRM_SYNC_SECRET not set. Skipping sync.");
     return { success: false, message: "CRM sync not configured." };
+  }
+
+  if (isSingle) {
+    url = url.replace(/\/results\/?$/, "/single-result");
   }
 
   const attemptPost = async () => {
