@@ -132,21 +132,7 @@ const Dashboard = () => {
                    </div>
                  </div>
 
-                 {searchResult.status !== 'Invalid' && (
-                   <div className="relative z-10">
-                     {searchResult.crmSynced === true ? (
-                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100/50 text-emerald-700 text-[11px] font-bold border border-emerald-200">
-                         <CheckCircle2 className="w-3.5 h-3.5" />
-                         CRM Synced
-                       </span>
-                     ) : (
-                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-100/50 text-orange-700 text-[11px] font-bold border border-orange-200">
-                         <AlertTriangle className="w-3.5 h-3.5" />
-                         CRM Sync Failed
-                       </span>
-                     )}
-                   </div>
-                 )}
+
               </div>
             </div>
           )}
