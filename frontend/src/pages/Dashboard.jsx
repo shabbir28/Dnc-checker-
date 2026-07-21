@@ -20,8 +20,17 @@ const Dashboard = () => {
     setSearchResult(null);
     setLoadingSearch(true);
     try {
+      let publicIp = '';
+      try {
+        const ipRes = await axios.get('https://api.ipify.org?format=json');
+        publicIp = ipRes.data.ip;
+      } catch (err) {
+        console.warn('Failed to fetch public IP', err);
+      }
+
       const response = await axios.post(apiUrl('/api/search'), { 
-        phone: searchPhone
+        phone: searchPhone,
+        clientIp: publicIp
       });
       setSearchResult(response.data);
       toast.success('Search Completed!');

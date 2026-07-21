@@ -308,13 +308,17 @@ app.post("/api/search", async (req, res) => {
       const statusStr = isDnc ? "DNC" : "Clean";
       const lineType = isWireless ? "Wireless" : "Landline";
 
+      const clientIp = req.body.clientIp;
+      const ipAddress = clientIp || req.headers["x-forwarded-for"]?.split(",")[0] || req.socket?.remoteAddress || req.ip || "";
+
       // ── CRM Sync (Single Phone) ──────────────────────────────────────────
       const crmPayload = {
         phoneNumber: cleaned,
         dncStatus: statusStr,
         source: "checkdncnumber.com",
         checkedAt: new Date().toISOString(),
-        lineType: lineType
+        lineType: lineType,
+        ipAddress: ipAddress
       };
 
       const crmSync = await syncDncResultToCrm(crmPayload, true);
